@@ -1,24 +1,167 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Train Scheduler</title>
-    <!-- CSS -->
-    <link rel="stylesheet" href="assets/css/style.css" type="text/css">
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    <!-- jQuery -->
-    <script
-    src="https://code.jquery.com/jquery-3.3.1.min.js"
-    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+
+<head>
+  <meta charset="UTF-8">
+  <title>Train Scheduler</title>
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+    crossorigin="anonymous">
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/style.css" type="text/css">
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
     crossorigin="anonymous"></script>
-  </head>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/5.7.0/firebase.js"></script>
+  <!-- Moment.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+</head>
 
-  <body>
-  <!-- Jumbotron -->
+<body>
+  <div class="container">
 
-  <!-- Table -->
+    <!-- Jumbotron -->
+    <div class="jumbotron" id="headerImage">
+      <h1 class="display-4 strokeme">Train Scheduler</h1>
+      <p class="lead strokeme">Trains, trains, trains. When and where are they?</p>
+    </div>
 
-  <!-- Form -->
-  </body>
+    <!-- Train Table -->
+    <div class="card">
+      <div class="card-header bg-warning">
+        Current Train Schedule
+      </div>
+      <div class="container" id="trainTable">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Train Name</th>
+              <th scope="col">Destination</th>
+              <th scope="col">Frequency (min)</th>
+              <th scope="col">Next Arrival</th>
+              <th scope="col">Minutes Away</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    </div>
+    <br>
+
+    <!-- Train Form -->
+    <!-- <div class="row">
+      <div class="col"> -->
+        <div class="card">
+          <div class="card-header bg-warning">
+            Add Train
+          </div>
+          <div class="container" id="addForm">
+            <form>
+              <div class="form-group">
+                <label for="train-input">Train Name</label>
+                <input type="text" class="form-control" id="train-input" placeholder="Train name">
+              </div>
+              <div class="form-group">
+                <label for="destination-input">Destination</label>
+                <input type="text" class="form-control" id="destination-input" placeholder="Destination">
+              </div>
+              <div class="form-group">
+                <label for="firstTime-input">First Train Time (HH:mm - military time)</label>
+                <input type="text" class="form-control" id="firstTime-input" placeholder="First train time">
+              </div>
+              <div class="form-group">
+                <label for="frequency-input">Frequency (min)</label>
+                <input type="text" class="form-control" id="frequency-input" placeholder="Frequency">
+              </div>
+              <button type="submit" class="btn btn-primary" id="addTrain">Submit</button>
+            </form>
+          </div>
+        </div>
+      <!-- </div>
+    </div> -->
+
+  </div>
+
+  <!-- JavaScript -->
+  <!-- <script src="assets/javascript/logic.js"></script> -->
+
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyDb-r6p6WlckyxGoDhzgCI2HxeQrmt8EsQ",
+      authDomain: "trainscheduler-c833d.firebaseapp.com",
+      databaseURL: "https://trainscheduler-c833d.firebaseio.com",
+      projectId: "trainscheduler-c833d",
+      storageBucket: "trainscheduler-c833d.appspot.com",
+      messagingSenderId: "23972045850"
+    };
+
+    firebase.initializeApp(config);
+
+    // Variable to reference the database
+    var database = firebase.database();
+
+    // Initial values
+    var train = "";
+    var destination = "";
+    var firstTime = "";
+    var frequency = "";
+
+    // Caputure button click
+    $("#addTrain").on("click", function (event) {
+      event.preventDefault()
+
+      // Grab values from text boxes
+      train = $("#train-input").val().trim();
+      destination = $("#destination-input").val().trim();
+      firstTime = $("#firstTime-input").val().trim();
+      frequency = $("#frequency-input").val().trim();
+
+      // Log values
+      console.log(train);
+      console.log(destination);
+      console.log(firstTime);
+      console.log(frequency);
+
+      // Code to handle the push
+      database.ref().push({
+        train: train,
+        destination: destination,
+        firstTime: firstTime,
+        frequency: frequency,
+        dateAdded: firebase.database.ServerValue.TIMESTAMP,
+      });
+
+    });
+
+
+    // Firebase watcher
+    database.ref().on("child_added", function (snapshot) {
+      // Storing snapshot.val in a var for convenience
+      var sv = snapshot.val();
+
+      // Log last user's data
+      console.log(sv.train);
+      console.log(sv.destiation);
+      console.log(sv.firstTime);
+      console.log(frequency);
+
+      // Change HTML to reflect data
+      // Variables to convert time with moment.js
+
+      // Append table
+      $(".table").append("<tr><td> " +
+        snapshot.val().train +
+        " </td><td> " + snapshot.val().destination +
+        " </td><td> " + snapshot.val().frequency +
+        " </td><td> " + " </td>");
+
+      // Handle errors
+    }, function (errorObject) {
+      console.log("Errors handled: " + errorObject.code);
+    });
+  </script>
+
+</body>
+
 </html>
