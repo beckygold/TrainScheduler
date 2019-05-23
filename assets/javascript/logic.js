@@ -29,12 +29,6 @@ $("#addTrain").on("click", function (event) {
     firstTime = $("#firstTime-input").val().trim();
     frequency = $("#frequency-input").val().trim();
 
-    // Log values
-    console.log(train);
-    console.log(destination);
-    console.log(firstTime);
-    console.log(frequency);
-
     // Create temporary object to hold data
     var newTrain = {
         train: train,
@@ -46,13 +40,6 @@ $("#addTrain").on("click", function (event) {
 
     // Code to handle the push
     database.ref().push(newTrain);
-    // database.ref().push({
-    //     train: train,
-    //     destination: destination,
-    //     firstTime: firstTime,
-    //     frequency: frequency,
-    //     dateAdded: firebase.database.ServerValue.TIMESTAMP,
-    // });
 
     // Alert
     alert("New train added")
@@ -67,24 +54,48 @@ $("#addTrain").on("click", function (event) {
 
 // Firebase watcher
 database.ref().on("child_added", function (snapshot) {
-    // Storing snapshot.val in a var for convenience
-    var sv = snapshot.val();
-
-    // Log last user's data
-    console.log(sv.train);
-    console.log(sv.destination);
-    console.log(sv.firstTime);
-    console.log(frequency);
+    // Storing everything into vars for convenience
+    var tName = snapshot.val().train;
+    var tDestination = snapshot.val().desination;
+    var tFirstTrain = snapshot.val().firstTime;
+    var tFrequency = snapshot.val().frequency;
 
     // Change HTML to reflect data
     // Variables to convert time with moment.js
+    var timeArr = tFirstTrain.split(":");
+    var trainTime = moment().hours(timeArr[0]).minutes(timeArr[1]);
+    var maxMoment = moment.max(moment(), trainTime);
+    // Moment.max returns the most distant future of the given moment instances
+    var tMinutes;
+    var tArrival;
+
+    // If the first train is later than the current time, set arrival to the first train time
+    if (maxMoment === trainTime) {
+        tArrival = trainTime.format("hh:mm A");
+        tMinutes = trainTime.diff(moment(), "minutes");
+    } else {
+        // Calculate minutes to next arrival
+        // Take current time in unix, subtract the tFirstTrain time, and find modulus between the difference and frequency
+        var differenceTimes = moment().diff(trainTime, "minutes");
+        var tRemainder = differenceTimes % tFrequency;
+        tMinutes = tFrequency - tRemainder;
+        // To calculate arrival time, add tMinutes to current time
+        tArrival = moment().add(tMinutes, "m").format("hh:mm A");
+    }
+    console.log("tName:", tName);
+    console.log("tMinutes:", tMinutes);
+    console.log("tArrival:", tArrival);
 
     // Append table
-    $(".table").append("<tr><td> " +
-        snapshot.val().train +
-        " </td><td> " + snapshot.val().destination +
-        " </td><td> " + snapshot.val().frequency +
-        " </td><td> " + " </td>");
+        $(".table").append(
+            $("<tr>").append(
+              $("<td>").text(tName),
+              $("<td>").text(tDestination),
+              $("<td>").text(tFrequency),
+              $("<td>").text(tArrival),
+              $("<td>").text(tMinutes)
+            )
+          );
 
     // Handle errors
 }, function (errorObject) {
