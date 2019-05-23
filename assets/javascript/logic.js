@@ -20,7 +20,7 @@ var firstTime = "";
 var frequency = "";
 
 // Caputure button click
-$("#addTrain").on("click", function(event) {
+$("#addTrain").on("click", function (event) {
     event.preventDefault()
 
     // Grab values from text boxes
@@ -35,17 +35,35 @@ $("#addTrain").on("click", function(event) {
     console.log(firstTime);
     console.log(frequency);
 
-    // Code to handle the push
-    database.ref().push({
+    // Create temporary object to hold data
+    var newTrain = {
         train: train,
         destination: destination,
         firstTime: firstTime,
         frequency: frequency,
         dateAdded: firebase.database.ServerValue.TIMESTAMP,
-    });
+    };
 
+    // Code to handle the push
+    database.ref().push(newTrain);
+    // database.ref().push({
+    //     train: train,
+    //     destination: destination,
+    //     firstTime: firstTime,
+    //     frequency: frequency,
+    //     dateAdded: firebase.database.ServerValue.TIMESTAMP,
+    // });
+
+    // Alert
+    alert("New train added")
+
+    // Clear text boxes
+    $("#train-input").val("");
+    $("#destination-input").val("");
+    $("#firstTime-input").val("");
+    $("#frequency-input").val("");
 });
-    
+
 
 // Firebase watcher
 database.ref().on("child_added", function (snapshot) {
@@ -63,10 +81,10 @@ database.ref().on("child_added", function (snapshot) {
 
     // Append table
     $(".table").append("<tr><td> " +
-    snapshot.val().train +
-    " </td><td> " + snapshot.val().destination + 
-    " </td><td> " + snapshot.val().frequency +
-    " </td><td> " + " </td>");
+        snapshot.val().train +
+        " </td><td> " + snapshot.val().destination +
+        " </td><td> " + snapshot.val().frequency +
+        " </td><td> " + " </td>");
 
     // Handle errors
 }, function (errorObject) {
