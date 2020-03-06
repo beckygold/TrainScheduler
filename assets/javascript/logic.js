@@ -56,7 +56,7 @@ $("#addTrain").on("click", function (event) {
 database.ref().on("child_added", function (snapshot) {
     // Storing everything into vars for convenience
     var tName = snapshot.val().train;
-    var tDestination = snapshot.val().desination;
+    var tDestination = snapshot.val().destination;
     var tFirstTrain = snapshot.val().firstTime;
     var tFrequency = snapshot.val().frequency;
 
