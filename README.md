@@ -15,7 +15,7 @@ A train scheduling app that utilizes a Firebase database to get up-to-date train
 * Firebase
 
 ## Usage
-Navigate to the app by clicking [here](https://beckygold.github.io/TrainScheduler/).
+Navigate to the app by clicking [here](https://rebeccagoldstein.github.io/TrainScheduler/).
 
 View upcoming trains on the train schedule.
 
